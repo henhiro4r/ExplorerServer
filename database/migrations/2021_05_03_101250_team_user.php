@@ -13,7 +13,12 @@ class TeamUser extends Migration
      */
     public function up()
     {
-        //
+        Schema::create('team_user', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('team_id');
+            $table->unsignedBigInteger('user_id');
+            $table->timestamps();
+        });
     }
 
     /**
@@ -23,6 +28,6 @@ class TeamUser extends Migration
      */
     public function down()
     {
-        //
+        Schema::dropIfExists('team_user');
     }
 }

@@ -20,6 +20,11 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'photo_url',
+        'bio',
+        'shift_id',
+        'expertise_id',
+        'role_id',
     ];
 
     /**
@@ -40,4 +45,20 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function role() {
+        return $this->belongsTo(Role::class);
+    }
+
+    public function expertise() {
+        return $this->belongsTo(Expertise::class);
+    }
+
+    public function shift() {
+        return $this->belongsTo(Shift::class);
+    }
+
+    public function teams() {
+        return $this->belongsToMany(Team::class);
+    }
 }

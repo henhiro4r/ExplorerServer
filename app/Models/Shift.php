@@ -5,16 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Team extends Model
+class Shift extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'team_name',
-        'team_logo',
+      'shift',
     ];
 
+
     public function users() {
-        return $this->belongsToMany(User::class);
+        return $this->hasMany(User::class);
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\ExplorerDataController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -19,4 +20,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 
+Route::get('explorer-preview', [ExplorerDataController::class, 'getPreview']);
 
+Route::get('explorers/{id}', [ExplorerDataController::class, 'getExplorer']);
+
+Route::get('explorers', [ExplorerDataController::class, 'getAll']);
