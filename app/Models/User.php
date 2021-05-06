@@ -25,6 +25,7 @@ class User extends Authenticatable
         'shift_id',
         'expertise_id',
         'role_id',
+        'otp_code',
     ];
 
     /**

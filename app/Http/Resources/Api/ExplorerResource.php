@@ -22,7 +22,6 @@ class ExplorerResource extends JsonResource
             'bio'=> $this->bio,
             'expertise' => $this->expertise->expertise,
             'role' => $this->role->name,
-//            'teams' => array($this->teams->team_name),
             'shift' => $this->shift->shift
         ];
     }
