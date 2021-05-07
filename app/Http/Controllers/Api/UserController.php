@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\OTPEvent;
+use App\Events\TempPasswordEvent;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\ExplorerResource;
-use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
@@ -31,9 +33,9 @@ class UserController extends Controller
 
         $token = $user->createToken('mobile')->plainTextToken;
         $response = [
-            'token_type' => "Bearer",
+            'message' => "success",
             'user' => ExplorerResource::make($user),
-            'token' => $token,
+            'token' => "Bearer " . $token,
         ];
         return response()->json($response, Response::HTTP_OK);
     }
@@ -44,7 +46,16 @@ class UserController extends Controller
             'email' => 'required|email',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('email', $request->email)->where('is_claimed', '0')->first();
+        $claimed = User::where('email', $request->email)->where('is_claimed', '1')->first();
+
+        if ($claimed) {
+            $response = [
+                'message' => "next",
+            ];
+
+            return response()->json($response, Response::HTTP_OK);
+        }
 
         if (!$user) {
             throw ValidationException::withMessages([
@@ -57,8 +68,11 @@ class UserController extends Controller
             'otp_code' => Hash::make($otp),
         ]);
 
+        event(new OTPEvent($user, $otp));
+
+
         $response = [
-            'message' => "We've sent you otp code to your email",
+            'message' => "success",
             'otp' => $otp,
         ];
         return response()->json($response, Response::HTTP_OK);
@@ -79,12 +93,19 @@ class UserController extends Controller
             ]);
         }
 
+        $password = Str::random(10);
+
         $user->update([
             'otp_code' => null,
+            'password' => Hash::make($password),
+            'is_claimed' => '1',
         ]);
 
+        event(new TempPasswordEvent($user, $password));
+
         $response = [
-            'message' => "Success, please update your password on the settings menu",
+            'message' => "success",
+            'password' => $password,
         ];
 
         return response()->json($response, Response::HTTP_OK);
@@ -94,17 +115,36 @@ class UserController extends Controller
 
     public function getProfile()
     {
-        return ExplorerResource::make(auth()->user())->response()->setStatusCode(Response::HTTP_OK);
+        $response = ExplorerResource::make(auth()->user());
+        return response()->json($response, Response::HTTP_OK);
     }
 
-    public function updateBio()
+    public function updateBio(Request $request)
     {
+        $user = auth()->user();
+        $user->update([
+            'bio' => $request->bio,
+        ]);
 
+        $response = [
+            'message' => "success",
+        ];
+
+        return response()->json($response, Response::HTTP_CREATED);
     }
 
-    public function changePassword()
+    public function changePassword(Request $request)
     {
+        $user = auth()->user();
+        $user->update([
+            'password' => Hash::make($request->password),
+        ]);
 
+        $response = [
+            'message' => "success",
+        ];
+
+        return response()->json($response, Response::HTTP_CREATED);
     }
 
     public function logout(): JsonResponse

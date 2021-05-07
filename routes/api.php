@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [UserController::class, 'logout']);
     Route::post('change-password', [UserController::class, 'changePassword']);
     Route::post('update-bio', [UserController::class, 'updateBio']);
